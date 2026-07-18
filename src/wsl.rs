@@ -6,8 +6,8 @@ use crate::download;
 use crate::verify;
 
 fn install_root() -> PathBuf {
-    let exe = std::env::current_exe().unwrap_or_default();
-    exe.parent().unwrap_or(std::path::Path::new(".")).join("bwslos")
+    let local = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+    PathBuf::from(local).join("wsl")
 }
 
 fn cache_dir() -> PathBuf {
