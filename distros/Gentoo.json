@@ -1,0 +1,6 @@
+{
+    "verjson": "20260712T170110Z",
+    "name": "Gentoo",
+    "url": "https://distfiles.gentoo.org/releases/amd64/autobuilds/20260712T170110Z/stage4-amd64-wsl-systemd-20260712T170110Z.wsl",
+    "installationtype": "wsl"
+}

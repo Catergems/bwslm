@@ -1,0 +1,6 @@
+{
+    "verjson": "2026.07.01",
+    "name": "Arch",
+    "url": "https://mirror.pkgbuild.com/wsl/latest/archlinux-2026.07.01.171406.wsl",
+    "installationtype": "wsl"
+}

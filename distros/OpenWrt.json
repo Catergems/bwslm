@@ -1,0 +1,12 @@
+{
+    "verjson": "25.12.5",
+    "name": "OpenWrt",
+    "url": "https://downloads.openwrt.org/releases/25.12.5/targets/x86/64/openwrt-25.12.5-x86-64-generic-targz-rootfs.tar.gz",
+    "installationtype": "tar",
+    "checksum": "https://downloads.openwrt.org/releases/25.12.5/targets/x86/64/sha256sums",
+    "checksumtype": "sha256txt",
+    "sigs": [
+        {"url": "https://downloads.openwrt.org/releases/25.12.5/targets/x86/64/sha256sums.sig", "type": "usign"},
+        {"url": "https://downloads.openwrt.org/releases/25.12.5/targets/x86/64/sha256sums.asc", "type": "gpg"}
+    ]
+}

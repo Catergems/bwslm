@@ -1,0 +1,8 @@
+{
+    "verjson": "3.24.1",
+    "name": "Alpine",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.1-x86_64.tar.gz",
+    "installationtype": "tar",
+    "checksum": "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.1-x86_64.tar.gz.sha256",
+    "checksumtype": "sha256"
+}

@@ -1,0 +1,11 @@
+{
+    "verjson": "20251220",
+    "name": "Chimera",
+    "url": "https://repo.chimera-linux.org/live/latest/chimera-linux-x86_64-ROOTFS-20251220-full.tar.gz",
+    "installationtype": "tar",
+    "checksum": "https://repo.chimera-linux.org/live/latest/sha256sums.txt",
+    "checksumtype": "sha256txt",
+    "sigs": [
+        {"url": "https://repo.chimera-linux.org/live/latest/sha256sums.txt.minisig", "type": "minisig"}
+    ]
+}

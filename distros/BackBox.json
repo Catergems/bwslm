@@ -1,0 +1,6 @@
+{
+    "verjson": "24.04",
+    "name": "BackBox",
+    "url": "https://github.com/EXALAB/Anlinux-Resources/raw/refs/heads/master/Rootfs/BackBox/amd64/backbox-rootfs-amd64.tar.xz",
+    "installationtype": "tar"
+}

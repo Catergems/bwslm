@@ -1,0 +1,6 @@
+{
+    "verjson": "10",
+    "name": "RockyOS",
+    "url": "https://dl.rockylinux.org/pub/rocky/10/images/x86_64/Rocky-10-WSL-Base.latest.x86_64.wsl",
+    "installationtype": "wsl"
+}

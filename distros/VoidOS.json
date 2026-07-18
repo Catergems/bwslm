@@ -1,0 +1,11 @@
+{
+    "verjson": "20250202",
+    "name": "VoidOS",
+    "url": "https://repo-default.voidlinux.org/live/current/void-x86_64-ROOTFS-20250202.tar.xz",
+    "installationtype": "tar",
+    "checksum": "https://repo-default.voidlinux.org/live/current/sha256sum.txt",
+    "checksumtype": "sha256bsd",
+    "sigs": [
+        {"url": "https://repo-default.voidlinux.org/live/current/sha256sum.sig", "type": "minisig"}
+    ]
+}

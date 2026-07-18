@@ -1,0 +1,6 @@
+{
+    "verjson": "15.0.30",
+    "name": "Slackware",
+    "url": "https://github.com/MahStudio/WSLackware/releases/download/15.0.30/install.tar.gz",
+    "installationtype": "tar"
+}
