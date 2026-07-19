@@ -10,6 +10,8 @@ use crate::verify::Sig;
 pub struct Distro {
     pub verjson: String,
     pub name: String,
+    #[serde(default)]
+    pub display_name: Option<String>,
     pub url: String,
     pub installationtype: String,
     #[serde(default)]
@@ -22,12 +24,28 @@ pub struct Distro {
     pub sigs: Vec<Sig>,
 }
 
+impl Distro {
+    pub fn display(&self) -> &str {
+        self.display_name.as_deref().unwrap_or(&self.name)
+    }
+}
+
 pub fn distros_dir() -> PathBuf {
+    // 1. Next to the exe (installed/release)
     if let Ok(exe) = std::env::current_exe() {
         let p = exe.parent().unwrap_or(std::path::Path::new(".")).join("distros");
         if p.exists() { return p; }
     }
-    std::env::current_dir().unwrap_or_default().join("distros")
+    // 2. Current working directory
+    let cwd = std::env::current_dir().unwrap_or_default();
+    let p = cwd.join("distros");
+    if p.exists() { return p; }
+    // 3. Parent of cwd (workspace root when cargo run from bwslm/ subfolder)
+    if let Some(parent) = cwd.parent() {
+        let p = parent.join("distros");
+        if p.exists() { return p; }
+    }
+    cwd.join("distros")
 }
 
 pub fn load_all() -> anyhow::Result<Vec<Distro>> {
@@ -45,7 +63,7 @@ pub fn load_all() -> anyhow::Result<Vec<Distro>> {
         }
     }
 
-    list.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    list.sort_by(|a, b| a.display().to_lowercase().cmp(&b.display().to_lowercase()));
     Ok(list)
 }
 
@@ -89,31 +107,67 @@ pub fn list_repo() -> anyhow::Result<()> {
         let is_installed = installed.contains(&d.name.to_lowercase());
         if is_installed { installed_count += 1; }
 
-        let marker = if is_installed {
-            "✔".green().bold()
-        } else {
-            "·".dimmed().into()
-        };
+        let marker = if is_installed { "✔".green().bold() } else { "·".dimmed().into() };
+        let display = d.display();
+        let name_colored = if is_installed { display.cyan().bold() } else { display.cyan().into() };
 
-        let name = if is_installed {
-            d.name.cyan().bold()
-        } else {
-            d.name.cyan().into()
-        };
-
-        let version = d.verjson.yellow();
-
-        println!("  {} {:<22}  {}", marker, name, version);
+        println!("  {} {:<22}  {}", marker, name_colored, d.verjson.yellow());
     }
 
     println!();
-    println!(
-        "  {} · {}",
-        format!("{} distros", list.len()).dimmed(),
-        format!("{} installed", installed_count).green()
-    );
+    println!("  {} · {}", format!("{} distros", list.len()).dimmed(), format!("{} installed", installed_count).green());
+    println!();
+    Ok(())
+}
+
+pub fn search_repo(query: &str, show_info: bool) -> anyhow::Result<()> {
+    let list = load_all()?;
+    let q = query.to_lowercase();
+
+    let results: Vec<&Distro> = list.iter()
+        .filter(|d| d.display().to_lowercase().contains(&q) || d.name.to_lowercase().contains(&q))
+        .collect();
+
+    if results.is_empty() {
+        println!("  {} No distros found matching '{}'.", "✦".bright_magenta(), query);
+        return Ok(());
+    }
+
+    let installed = installed_distros();
+
+    println!();
+    println!("  {} Search: {}", "✦".bright_magenta().bold(), query.cyan().bold());
     println!();
 
+    for d in &results {
+        let is_installed = installed.contains(&d.name.to_lowercase());
+        let marker = if is_installed { "✔".green().bold() } else { "·".dimmed().into() };
+        let display = d.display();
+        let name_colored = if is_installed { display.cyan().bold() } else { display.cyan().into() };
+
+        println!("  {} {:<22}  {}", marker, name_colored, d.verjson.yellow());
+
+        if show_info {
+            println!("      {} {}", "name:".dimmed(), d.name.white());
+            println!("      {} {}", "type:".dimmed(), d.installationtype.white());
+            println!("      {} {}", "url: ".dimmed(), d.url.white());
+            if !d.info.is_empty() {
+                println!("      {} {}", "info:".dimmed(), d.info.white());
+            }
+            if d.checksum.is_some() {
+                println!("      {} {}", "checksum:".dimmed(), "yes".green());
+            }
+            if !d.sigs.is_empty() {
+                let sig_types: Vec<&str> = d.sigs.iter().map(|s| s.sig_type.as_str()).collect();
+                println!("      {} {}", "sigs:".dimmed(), sig_types.join(", ").white());
+            }
+            println!();
+        }
+    }
+
+    println!();
+    println!("  {}", format!("{} result(s)", results.len()).dimmed());
+    println!();
     Ok(())
 }
 

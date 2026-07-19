@@ -1,11 +1,15 @@
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 use std::time::Instant;
 
 const BAR_WIDTH: usize = 50;
 const SPINNER: &[&str] = &["|", "/", "-", "\\"];
 
 pub fn download(url: &str, dest: &std::path::Path) -> anyhow::Result<()> {
-    let client = reqwest::blocking::Client::new();
+    let client = reqwest::blocking::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .redirect(reqwest::redirect::Policy::limited(10))
+        .build()?;
+
     let mut resp = client.get(url).send()?;
 
     if !resp.status().is_success() {
@@ -28,10 +32,9 @@ pub fn download(url: &str, dest: &std::path::Path) -> anyhow::Result<()> {
     let mut downloaded: u64 = 0;
     let start = Instant::now();
     let mut spin_idx = 0usize;
-    let mut buf = vec![0u8; 8192];
+    let mut buf = vec![0u8; 65536];
 
     loop {
-        use std::io::Read;
         let n = resp.read(&mut buf)?;
         if n == 0 { break; }
         file.write_all(&buf[..n])?;
@@ -54,10 +57,8 @@ pub fn download(url: &str, dest: &std::path::Path) -> anyhow::Result<()> {
         io::stdout().flush()?;
     }
 
-    let elapsed = start.elapsed().as_secs_f64();
     let bar = "■".repeat(BAR_WIDTH);
     println!("\r[{}] 100%  -  EST: 0s          ", bar);
-    let _ = elapsed;
 
     Ok(())
 }

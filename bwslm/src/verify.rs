@@ -1,7 +1,7 @@
 use serde::Deserialize;
-use sha2::{Sha256, Digest};
+use sha2::{Sha256, Sha512, Digest};
 use std::fs;
-use std::io::{self, Write};
+use std::io::{self, Read, Write};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Sig {
@@ -43,7 +43,7 @@ fn verify_checksum(local_file: &std::path::Path, checksum_url: &str, checksum_ty
     let txt = fetch_text(checksum_url)?;
     let filename = local_file.file_name().unwrap_or_default().to_string_lossy().to_string();
     let expected = extract_hash(&txt, checksum_type, &filename)?;
-    let got = sha256_file(local_file)?;
+    let got = hash_file(local_file, checksum_type)?;
 
     if got.to_lowercase() != expected.to_lowercase() {
         println!();
@@ -56,7 +56,7 @@ fn verify_checksum(local_file: &std::path::Path, checksum_url: &str, checksum_ty
 
 fn extract_hash(txt: &str, checksum_type: &str, filename: &str) -> anyhow::Result<String> {
     match checksum_type {
-        "sha256txt" => {
+        "sha256txt" | "sha512txt" => {
             for line in txt.lines() {
                 let parts: Vec<&str> = line.split_whitespace().collect();
                 if parts.len() >= 2 {
@@ -70,9 +70,10 @@ fn extract_hash(txt: &str, checksum_type: &str, filename: &str) -> anyhow::Resul
             }
             anyhow::bail!("Could not find {} in checksum file", filename)
         }
-        "sha256bsd" => {
+        "sha256bsd" | "sha512bsd" => {
+            let prefix = if checksum_type.starts_with("sha512") { "SHA512" } else { "SHA256" };
             for line in txt.lines() {
-                if !line.starts_with("SHA256") { continue; }
+                if !line.starts_with(prefix) { continue; }
                 let start = line.find('(');
                 let end = line.find(')');
                 if let (Some(s), Some(e)) = (start, end) {
@@ -86,15 +87,33 @@ fn extract_hash(txt: &str, checksum_type: &str, filename: &str) -> anyhow::Resul
             }
             anyhow::bail!("Could not find {} in checksum file", filename)
         }
-        "sha256" => Ok(txt.split_whitespace().next().unwrap_or("").to_string()),
+        "sha256" | "sha512" => Ok(txt.split_whitespace().next().unwrap_or("").to_string()),
         _ => anyhow::bail!("Unknown checksumtype '{}'", checksum_type),
     }
 }
 
-fn sha256_file(path: &std::path::Path) -> anyhow::Result<String> {
-    let data = fs::read(path)?;
-    let hash = Sha256::digest(&data);
-    Ok(format!("{:x}", hash))
+fn hash_file(path: &std::path::Path, checksum_type: &str) -> anyhow::Result<String> {
+    let file = fs::File::open(path)?;
+    let mut reader = io::BufReader::new(file);
+    let mut buf = vec![0u8; 65536];
+
+    if checksum_type.starts_with("sha512") {
+        let mut hasher = Sha512::new();
+        loop {
+            let n = reader.read(&mut buf)?;
+            if n == 0 { break; }
+            hasher.update(&buf[..n]);
+        }
+        Ok(format!("{:x}", hasher.finalize()))
+    } else {
+        let mut hasher = Sha256::new();
+        loop {
+            let n = reader.read(&mut buf)?;
+            if n == 0 { break; }
+            hasher.update(&buf[..n]);
+        }
+        Ok(format!("{:x}", hasher.finalize()))
+    }
 }
 
 fn verify_sig(checksum_url: Option<&str>, sig_url: &str, sig_type: &str) -> anyhow::Result<()> {

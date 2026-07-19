@@ -1,0 +1,12 @@
+{
+    "verjson": "15.2",
+    "name": "OpenSUSE_Leap",
+    "display_name": "OpenSUSE Leap",
+    "url": "https://download.opensuse.org/pub/opensuse/repositories/Cloud%3A/Images%3A/Leap_15.2/images/openSUSE-Leap-15.2.x86.tar.gz",
+    "installationtype": "tar",
+    "checksum": "https://download.opensuse.org/pub/opensuse/repositories/Cloud%3A/Images%3A/Leap_15.2/images/openSUSE-Leap-15.2.x86.tar.gz.sha256",
+    "checksumtype": "sha256",
+    "sigs": [
+        {"url": "https://download.opensuse.org/pub/opensuse/repositories/Cloud%3A/Images%3A/Leap_15.2/images/openSUSE-Leap-15.2.x86.tar.gz.sha256.asc", "type": "gpg"}
+    ]
+}
